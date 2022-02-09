@@ -2,11 +2,37 @@ import { galleryItems } from './gallery-items.js';
 
 // Change code below this line
 
-
 const galleryRef = document.querySelector('.gallery');
+
+var activeRef = '';
 
 galleryRef.innerHTML = createMarkUp(galleryItems);
 galleryRef.addEventListener('click', onGalleryRefClick);
+
+const modalWindow = {
+    link: null,
+    instance: '',
+    createInstance() {
+        this.instance = basicLightbox.create(
+            `<img src="${this.link}" width="800" height="600">`,
+            {
+                onShow: instance => {
+                    window.addEventListener('keydown', closeEscape);
+                },
+                onClose: instance => {
+                    window.removeEventListener('keydown', closeEscape);
+                    console.log('removed');
+                },
+            },
+        );
+    },
+};
+
+function closeEscape(evt) {
+    if (evt.code === 'Escape') {
+        modalWindow.instance.close();
+    }
+}
 
 function checkLazyLoad() {
     if ('loading' in HTMLImageElement.prototype) {
@@ -20,7 +46,7 @@ function checkLazyLoad() {
         script.crossOrigin = 'anonymous';
         script.referrerpolicy = 'no-referrer';
         document.body.appendChild(script);
-        return false
+        return false;
     }
 }
 
@@ -32,6 +58,7 @@ function createMarkUp(data) {
   <a class="gallery__link" href="${original}">
     <img
       class="gallery__image"
+      height='340'
       loading='lazy'
       src="${preview}"
       data-source="${original}"
@@ -48,6 +75,7 @@ function createMarkUp(data) {
   <a class="gallery__link" href="${original}">
     <img
       class="gallery__image"
+      height='340'
       loading='lazy'
       class='lazyload'
       data-src='${preview}'
@@ -55,11 +83,11 @@ function createMarkUp(data) {
       alt="${description}"
     />
   </a>
-</div>`;})
+</div>`;
+            })
             .join('');
     }
 }
-
 
 function onGalleryRefClick(evt) {
     evt.preventDefault();
@@ -68,17 +96,7 @@ function onGalleryRefClick(evt) {
         return;
     }
     const imageRefOriginal = elementOnClick.dataset.source;
-    cretaeModalWindow(imageRefOriginal);
-}
-
-function cretaeModalWindow(imageRef) {
-    const instance = basicLightbox.create(
-        `<img src="${imageRef}" width="800" height="600">`,
-    );
-    instance.show();
-    galleryRef.addEventListener('keydown', evt => {
-        if (evt.code === 'Escape') {
-            instance.close();
-        }
-    });
+    modalWindow.link = imageRefOriginal;
+    modalWindow.createInstance();
+    modalWindow.instance.show();
 }
